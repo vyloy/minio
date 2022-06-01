@@ -18,10 +18,47 @@
 package cmd
 
 import (
+	"bytes"
 	"encoding/base64"
 	"net/url"
+	"runtime"
 	"strconv"
 )
+
+func encodeLongFilename(name string) (result string) {
+	if len(name) <= 245 {
+		return name
+	}
+	var count int
+	var converted bytes.Buffer
+	var update bool
+	ob := []byte(name)
+	for _, p := range ob {
+		converted.WriteByte(p)
+		switch p {
+		case '/':
+			count = 0
+		case '\\':
+			if runtime.GOOS == globalWindowsOSName {
+				count = 0
+			}
+		default:
+			count++
+			if count > 245 {
+				update = true
+				buf := converted.Bytes()
+				converted.Write(buf[len(buf)-6:])
+				copy(buf[len(buf)-6:], ".$^.^/")
+				count = 0
+			}
+		}
+	}
+	if update {
+		result = converted.String()
+		return
+	}
+	return name
+}
 
 // Parse bucket url queries
 func getListObjectsV1Args(values url.Values) (prefix, marker, delimiter string, maxkeys int, encodingType string, errCode APIErrorCode) {
@@ -38,6 +75,7 @@ func getListObjectsV1Args(values url.Values) (prefix, marker, delimiter string, 
 	}
 
 	prefix = trimLeadingSlash(values.Get("prefix"))
+	prefix = encodeLongFilename(prefix)
 	marker = trimLeadingSlash(values.Get("marker"))
 	delimiter = values.Get("delimiter")
 	encodingType = values.Get("encoding-type")
@@ -58,6 +96,7 @@ func getListBucketObjectVersionsArgs(values url.Values) (prefix, marker, delimit
 	}
 
 	prefix = trimLeadingSlash(values.Get("prefix"))
+	prefix = encodeLongFilename(prefix)
 	marker = trimLeadingSlash(values.Get("key-marker"))
 	delimiter = values.Get("delimiter")
 	encodingType = values.Get("encoding-type")
@@ -88,6 +127,7 @@ func getListObjectsV2Args(values url.Values) (prefix, token, startAfter, delimit
 	}
 
 	prefix = trimLeadingSlash(values.Get("prefix"))
+	prefix = encodeLongFilename(prefix)
 	startAfter = trimLeadingSlash(values.Get("start-after"))
 	delimiter = values.Get("delimiter")
 	fetchOwner = values.Get("fetch-owner") == "true"
@@ -119,6 +159,7 @@ func getBucketMultipartResources(values url.Values) (prefix, keyMarker, uploadID
 	}
 
 	prefix = trimLeadingSlash(values.Get("prefix"))
+	prefix = encodeLongFilename(prefix)
 	keyMarker = trimLeadingSlash(values.Get("key-marker"))
 	uploadIDMarker = values.Get("upload-id-marker")
 	delimiter = values.Get("delimiter")

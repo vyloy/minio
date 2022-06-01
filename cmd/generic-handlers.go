@@ -18,24 +18,26 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"net"
 	"net/http"
 	"path"
+	"runtime"
 	"runtime/debug"
 	"strings"
 	"sync/atomic"
 	"time"
 
-	"github.com/minio/minio-go/v7/pkg/set"
-	xnet "github.com/minio/pkg/net"
-
 	"github.com/dustin/go-humanize"
+	"github.com/gorilla/mux"
+	"github.com/minio/minio-go/v7/pkg/set"
 	"github.com/minio/minio/internal/config/dns"
 	"github.com/minio/minio/internal/crypto"
 	xhttp "github.com/minio/minio/internal/http"
 	"github.com/minio/minio/internal/http/stats"
 	"github.com/minio/minio/internal/logger"
+	xnet "github.com/minio/pkg/net"
 )
 
 const (
@@ -376,6 +378,37 @@ func setRequestValidityHandler(h http.Handler) http.Handler {
 			if !guessIsRPCReq(r) && !guessIsBrowserReq(r) && !guessIsHealthCheckReq(r) && !guessIsMetricsReq(r) && !isAdminReq(r) {
 				writeErrorResponse(r.Context(), w, errorCodes.ToAPIErr(ErrAllAccessDisabled), r.URL)
 				return
+			}
+		}
+		vars := mux.Vars(r)
+		object, err := unescapePath(vars["object"])
+		if err == nil && len(object) > 245 {
+			var count int
+			var converted bytes.Buffer
+			var update bool
+			ob := []byte(object)
+			for _, p := range ob {
+				converted.WriteByte(p)
+				switch p {
+				case '/':
+					count = 0
+				case '\\':
+					if runtime.GOOS == globalWindowsOSName {
+						count = 0
+					}
+				default:
+					count++
+					if count > 245 {
+						update = true
+						buf := converted.Bytes()
+						converted.Write(buf[len(buf)-6:])
+						copy(buf[len(buf)-6:], ".$^.^/")
+						count = 0
+					}
+				}
+			}
+			if update {
+				vars["object"] = converted.String()
 			}
 		}
 		// Deny SSE-C requests if not made over TLS

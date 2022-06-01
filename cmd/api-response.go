@@ -18,6 +18,7 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/xml"
@@ -25,6 +26,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -449,7 +451,7 @@ func generateListVersionsResponse(bucket, prefix, marker, versionIDMarker, delim
 		if object.Name == "" {
 			continue
 		}
-		content.Key = s3EncodeName(object.Name, encodingType)
+		content.Key = s3EncodeName(recoverLongObjectName(object.Name), encodingType)
 		content.LastModified = object.ModTime.UTC().Format(iso8601TimeFormat)
 		if object.ETag != "" {
 			content.ETag = "\"" + object.ETag + "\""
@@ -507,7 +509,7 @@ func generateListObjectsV1Response(bucket, prefix, marker, delimiter, encodingTy
 		if object.Name == "" {
 			continue
 		}
-		content.Key = s3EncodeName(object.Name, encodingType)
+		content.Key = s3EncodeName(recoverLongObjectName(object.Name), encodingType)
 		content.LastModified = object.ModTime.UTC().Format(iso8601TimeFormat)
 		if object.ETag != "" {
 			content.ETag = "\"" + object.ETag + "\""
@@ -542,6 +544,45 @@ func generateListObjectsV1Response(bucket, prefix, marker, delimiter, encodingTy
 	return data
 }
 
+func recoverLongObjectName(name string) (result string) {
+	if len(name) <= 245 {
+		return name
+	}
+	i := strings.Index(name, ".$^.^/")
+	if i == -1 {
+		return name
+	}
+	ob := []byte(name)
+	var count int
+	var converted bytes.Buffer
+	var update bool
+	for _, p := range ob {
+		converted.WriteByte(p)
+		switch p {
+		case '/':
+			if count == 245 {
+				update = true
+				buf := converted.Bytes()
+				if bytes.Equal(buf[len(buf)-6:], []byte(".$^.^/")) {
+					converted.Truncate(len(buf) - 6)
+				}
+			}
+			count = 0
+		case '\\':
+			if runtime.GOOS == globalWindowsOSName {
+				count = 0
+			}
+		default:
+			count++
+		}
+	}
+	if !update {
+		return name
+	}
+	result = converted.String()
+	return
+}
+
 // generates an ListObjectsV2 response for the said bucket with other enumerated options.
 func generateListObjectsV2Response(bucket, prefix, token, nextToken, startAfter, delimiter, encodingType string, fetchOwner, isTruncated bool, maxKeys int, objects []ObjectInfo, prefixes []string, metadata bool) ListObjectsV2Response {
 	contents := make([]Object, 0, len(objects))
@@ -556,7 +597,7 @@ func generateListObjectsV2Response(bucket, prefix, token, nextToken, startAfter,
 		if object.Name == "" {
 			continue
 		}
-		content.Key = s3EncodeName(object.Name, encodingType)
+		content.Key = s3EncodeName(recoverLongObjectName(object.Name), encodingType)
 		content.LastModified = object.ModTime.UTC().Format(iso8601TimeFormat)
 		if object.ETag != "" {
 			content.ETag = "\"" + object.ETag + "\""

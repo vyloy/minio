@@ -176,6 +176,9 @@ func (o *listPathOptions) gatherResults(ctx context.Context, in <-chan metaCache
 			if !strings.HasPrefix(entry.name, o.Prefix) {
 				continue
 			}
+			if o.Prefix != entry.name {
+				entry.name = recoverLongObjectName(entry.name)
+			}
 			if !o.Recursive && !entry.isInDir(o.Prefix, o.Separator) {
 				continue
 			}

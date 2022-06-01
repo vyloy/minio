@@ -437,7 +437,7 @@ func (api objectAPIHandlers) DeleteMultipleObjectsHandler(w http.ResponseWriter,
 	objects := make([]ObjectV, len(deleteObjectsReq.Objects))
 	// Convert object name delete objects if it has `/` in the beginning.
 	for i := range deleteObjectsReq.Objects {
-		deleteObjectsReq.Objects[i].ObjectName = trimLeadingSlash(deleteObjectsReq.Objects[i].ObjectName)
+		deleteObjectsReq.Objects[i].ObjectName = encodeLongFilename(trimLeadingSlash(deleteObjectsReq.Objects[i].ObjectName))
 		objects[i] = deleteObjectsReq.Objects[i].ObjectV
 	}
 

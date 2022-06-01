@@ -225,7 +225,8 @@ func doTreeWalk(ctx context.Context, bucket, prefixDir, entryPrefixMatch, marker
 				continue
 			}
 		}
-		if recursive && isDir {
+		longFilename := isDir && len(entry) >= 245 && strings.HasSuffix(entry, ".$^.^/")
+		if recursive && isDir || longFilename {
 			// If the entry is a directory, we will need recurse into it.
 			markerArg := ""
 			if entry == markerDir {
@@ -237,7 +238,7 @@ func doTreeWalk(ctx context.Context, bucket, prefixDir, entryPrefixMatch, marker
 			// markIsEnd is passed to this entry's treeWalk() so that treeWalker.end can be marked
 			// true at the end of the treeWalk stream.
 			markIsEnd := i == len(entries)-1 && isEnd
-			emptyDir, err := doTreeWalk(ctx, bucket, pathJoin(prefixDir, entry), prefixMatch, markerArg, recursive,
+			emptyDir, err := doTreeWalk(ctx, bucket, pathJoin(prefixDir, entry), prefixMatch, markerArg, recursive || longFilename,
 				listDir, isLeaf, isLeafDir, resultCh, endWalkCh, markIsEnd)
 			if err != nil {
 				return false, err

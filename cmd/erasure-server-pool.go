@@ -1141,6 +1141,7 @@ func (z *erasureServerPools) ListObjectVersions(ctx context.Context, bucket, pre
 		loi.IsTruncated = true
 	}
 	for _, obj := range objects {
+		obj.Name = recoverLongObjectName(obj.Name)
 		if obj.IsDir && obj.ModTime.IsZero() && delimiter != "" {
 			loi.Prefixes = append(loi.Prefixes, obj.Name)
 		} else {

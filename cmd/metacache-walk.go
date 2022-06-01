@@ -23,6 +23,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"runtime/debug"
 	"sort"
 	"strconv"
@@ -144,6 +145,28 @@ func (s *xlStorage) WalkDir(ctx context.Context, opts WalkDirOptions, wr io.Writ
 		}
 		dirObjects := make(map[string]struct{})
 		for i, entry := range entries {
+			longFilename := len(entry) >= 245 && strings.HasSuffix(entry, ".$^.^/")
+			if longFilename {
+				s.walkMu.Lock()
+				longEntry, err := s.ListDir(ctx, opts.Bucket, filepath.Join(current, entry), -1)
+				s.walkMu.Unlock()
+				if err != nil {
+					// Folder could have gone away in-between
+					if err != errVolumeNotFound && err != errFileNotFound {
+						logger.LogIf(ctx, err)
+					}
+					if opts.ReportNotFound && err == errFileNotFound && current == opts.BaseDir {
+						return errFileNotFound
+					}
+					// Forward some errors?
+					return nil
+				}
+				if len(longEntry) > 0 {
+					entry = filepath.Join(entry, longEntry[0])
+					entries[i] = entry
+					continue
+				}
+			}
 			if len(prefix) > 0 && !strings.HasPrefix(entry, prefix) {
 				// Do do not retain the file, since it doesn't
 				// match the prefix.
