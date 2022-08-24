@@ -779,7 +779,7 @@ func (s *peerRESTServer) GetLocalDiskIDs(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	z, ok := objLayer.(*erasureServerPools)
+	z, ok := cast2ErasureServerPools(objLayer)
 	if !ok {
 		s.writeErrorResponse(w, errServerNotInitialized)
 		return
@@ -1058,7 +1058,7 @@ func (s *peerRESTServer) ReloadPoolMetaHandler(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	pools, ok := objAPI.(*erasureServerPools)
+	pools, ok := cast2ErasureServerPools(objAPI)
 	if !ok {
 		return
 	}

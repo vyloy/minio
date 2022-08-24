@@ -162,7 +162,7 @@ func TestShuffleDisks(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer removeRoots(disks)
-	z := objLayer.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(objLayer)
 	testShuffleDisks(t, z)
 }
 
@@ -210,7 +210,7 @@ func TestEvalDisks(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer removeRoots(disks)
-	z := objLayer.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(objLayer)
 	testShuffleDisks(t, z)
 }
 

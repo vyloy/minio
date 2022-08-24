@@ -145,7 +145,7 @@ func (s *xlStorage) WalkDir(ctx context.Context, opts WalkDirOptions, wr io.Writ
 		}
 		dirObjects := make(map[string]struct{})
 		for i, entry := range entries {
-			longFilename := len(entry) >= 245 && strings.HasSuffix(entry, ".$^.^/")
+			longFilename := len(entry) >= 245 && strings.HasSuffix(entry, magicSuffix)
 			if longFilename {
 				s.walkMu.Lock()
 				longEntry, err := s.ListDir(ctx, opts.Bucket, filepath.Join(current, entry), -1)

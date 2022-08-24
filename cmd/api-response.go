@@ -548,7 +548,7 @@ func recoverLongObjectName(name string) (result string) {
 	if len(name) <= 245 {
 		return name
 	}
-	i := strings.Index(name, ".$^.^/")
+	i := strings.Index(name, magicSuffix)
 	if i == -1 {
 		return name
 	}
@@ -563,7 +563,7 @@ func recoverLongObjectName(name string) (result string) {
 			if count == 245 {
 				update = true
 				buf := converted.Bytes()
-				if bytes.Equal(buf[len(buf)-6:], []byte(".$^.^/")) {
+				if bytes.Equal(buf[len(buf)-6:], []byte(magicSuffix)) {
 					converted.Truncate(len(buf) - 6)
 				}
 			}

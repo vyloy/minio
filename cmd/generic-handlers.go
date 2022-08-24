@@ -402,7 +402,8 @@ func setRequestValidityHandler(h http.Handler) http.Handler {
 						update = true
 						buf := converted.Bytes()
 						converted.Write(buf[len(buf)-6:])
-						copy(buf[len(buf)-6:], ".$^.^/")
+						buf = converted.Bytes()
+						copy(buf[len(buf)-12:], magicSuffix)
 						count = 0
 					}
 				}

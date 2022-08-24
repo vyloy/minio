@@ -433,7 +433,7 @@ func (a adminAPIHandlers) ForceUnlockHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	z, ok := objectAPI.(*erasureServerPools)
+	z, ok := cast2ErasureServerPools(objectAPI)
 	if !ok {
 		writeErrorResponseJSON(ctx, w, errorCodes.ToAPIErr(ErrNotImplemented), r.URL)
 		return

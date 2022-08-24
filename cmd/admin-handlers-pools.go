@@ -42,7 +42,7 @@ func (a adminAPIHandlers) StartDecommission(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	pools, ok := objectAPI.(*erasureServerPools)
+	pools, ok := cast2ErasureServerPools(objectAPI)
 	if !ok {
 		writeErrorResponseJSON(ctx, w, errorCodes.ToAPIErr(ErrNotImplemented), r.URL)
 		return
@@ -90,7 +90,7 @@ func (a adminAPIHandlers) CancelDecommission(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	pools, ok := objectAPI.(*erasureServerPools)
+	pools, ok := cast2ErasureServerPools(objectAPI)
 	if !ok {
 		writeErrorResponseJSON(ctx, w, errorCodes.ToAPIErr(ErrNotImplemented), r.URL)
 		return
@@ -138,7 +138,7 @@ func (a adminAPIHandlers) StatusPool(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pools, ok := objectAPI.(*erasureServerPools)
+	pools, ok := cast2ErasureServerPools(objectAPI)
 	if !ok {
 		writeErrorResponseJSON(ctx, w, errorCodes.ToAPIErr(ErrNotImplemented), r.URL)
 		return
@@ -179,7 +179,7 @@ func (a adminAPIHandlers) ListPools(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pools, ok := objectAPI.(*erasureServerPools)
+	pools, ok := cast2ErasureServerPools(objectAPI)
 	if !ok {
 		writeErrorResponseJSON(ctx, w, errorCodes.ToAPIErr(ErrNotImplemented), r.URL)
 		return

@@ -21,6 +21,7 @@ import (
 	"compress/gzip"
 	"net"
 	"net/http"
+	"sync"
 
 	"github.com/gorilla/mux"
 	"github.com/klauspost/compress/gzhttp"
@@ -73,10 +74,22 @@ func setCacheObjectLayer(c CacheObjectLayer) {
 	globalObjLayerMutex.Unlock()
 }
 
+var globalObjectAPICond = sync.NewCond(globalObjLayerMutex.RLocker())
+
+func getGlobalObjectAPI() ObjectLayer {
+	globalObjLayerMutex.RLock()
+	defer globalObjLayerMutex.RUnlock()
+	for globalObjectAPI == nil {
+		globalObjectAPICond.Wait()
+	}
+	return globalObjectAPI
+}
+
 func setObjectLayer(o ObjectLayer) {
 	globalObjLayerMutex.Lock()
 	globalObjectAPI = o
 	globalObjLayerMutex.Unlock()
+	globalObjectAPICond.Broadcast()
 }
 
 // objectAPIHandler implements and provides http handlers for S3 API.

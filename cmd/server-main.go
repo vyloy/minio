@@ -490,6 +490,7 @@ func serverMain(ctx *cli.Context) {
 		UseCustomLogger(log.New(ioutil.Discard, "", 0)) // Turn-off random logging by Go stdlib
 
 	go func() {
+		waitSync.Wait()
 		globalHTTPServerErrorCh <- httpServer.Start(GlobalContext)
 	}()
 
@@ -651,5 +652,9 @@ func newObjectLayer(ctx context.Context, endpointServerPools EndpointServerPools
 		return NewFSObjectLayer(endpointServerPools[0].Endpoints[0].Path)
 	}
 
-	return newErasureServerPools(ctx, endpointServerPools)
+	newObject, err = newErasureServerPools(ctx, endpointServerPools)
+	if err == nil && globalDB.Load() != nil {
+		newObject = &dbObjectLayer{ObjectLayer: newObject}
+	}
+	return
 }

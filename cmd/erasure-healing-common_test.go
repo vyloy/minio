@@ -183,7 +183,7 @@ func TestListOnlineDisks(t *testing.T) {
 
 	object := "object"
 	data := bytes.Repeat([]byte("a"), smallFileThreshold*16)
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	erasureDisks := z.serverPools[0].sets[0].getDisks()
 	for i, test := range testCases {
 		test := test
@@ -355,7 +355,7 @@ func TestListOnlineDisksSmallObjects(t *testing.T) {
 
 	object := "object"
 	data := bytes.Repeat([]byte("a"), smallFileThreshold/2)
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	erasureDisks := z.serverPools[0].sets[0].getDisks()
 	for i, test := range testCases {
 		test := test
@@ -463,7 +463,7 @@ func TestDisksWithAllParts(t *testing.T) {
 	// make data with more than one part
 	partCount := 3
 	data := bytes.Repeat([]byte("a"), 6*1024*1024*partCount)
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	s := z.serverPools[0].sets[0]
 	erasureDisks := s.getDisks()
 	err = obj.MakeBucketWithLocation(ctx, "bucket", BucketOptions{})

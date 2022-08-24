@@ -56,9 +56,10 @@ func storeDataUsageInBackend(ctx context.Context, objAPI ObjectLayer, dui <-chan
 }
 
 // loadPrefixUsageFromBackend returns prefix usages found in passed buckets
-//   e.g.:  /testbucket/prefix => 355601334
+//
+//	e.g.:  /testbucket/prefix => 355601334
 func loadPrefixUsageFromBackend(ctx context.Context, objAPI ObjectLayer, bucket string) (map[string]uint64, error) {
-	z, ok := objAPI.(*erasureServerPools)
+	z, ok := cast2ErasureServerPools(objAPI)
 	if !ok {
 		// Prefix usage is empty
 		return map[string]uint64{}, nil

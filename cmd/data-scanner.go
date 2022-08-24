@@ -357,7 +357,7 @@ func scanDataFolder(ctx context.Context, poolIdx, setIdx int, basePath string, c
 
 	// Add disks for set healing.
 	if poolIdx >= 0 && setIdx >= 0 {
-		objAPI, ok := newObjectLayerFn().(*erasureServerPools)
+		objAPI, ok := cast2ErasureServerPools(newObjectLayerFn())
 		if ok {
 			if poolIdx < len(objAPI.serverPools) && setIdx < len(objAPI.serverPools[poolIdx].sets) {
 				// Pass the disks belonging to the set.
@@ -703,7 +703,7 @@ func (f *folderScanner) scanFolder(ctx context.Context, folder cachedFolder, int
 			break
 		}
 
-		objAPI, ok := newObjectLayerFn().(*erasureServerPools)
+		objAPI, ok := cast2ErasureServerPools(newObjectLayerFn())
 		if !ok || len(f.disks) == 0 || f.disksQuorum == 0 {
 			break
 		}

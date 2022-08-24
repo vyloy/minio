@@ -221,7 +221,7 @@ func TestErasureDeleteObjectsErasureSet(t *testing.T) {
 		for _, dir := range fsDirs {
 			defer os.RemoveAll(dir)
 		}
-		z := obj.(*erasureServerPools)
+		z := mustCast2ErasureServerPools(obj)
 		xl := z.serverPools[0].sets[0]
 		objs = append(objs, xl)
 	}
@@ -298,7 +298,7 @@ func TestErasureDeleteObjectDiskNotFound(t *testing.T) {
 	defer obj.Shutdown(context.Background())
 	defer removeRoots(fsDirs)
 
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	xl := z.serverPools[0].sets[0]
 
 	// Create "bucket"
@@ -367,7 +367,7 @@ func TestErasureDeleteObjectDiskNotFoundErasure4(t *testing.T) {
 	defer obj.Shutdown(context.Background())
 	defer removeRoots(fsDirs)
 
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	xl := z.serverPools[0].sets[0]
 
 	// Create "bucket"
@@ -427,7 +427,7 @@ func TestErasureDeleteObjectDiskNotFoundErr(t *testing.T) {
 	defer obj.Shutdown(context.Background())
 	defer removeRoots(fsDirs)
 
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	xl := z.serverPools[0].sets[0]
 
 	// Create "bucket"
@@ -498,7 +498,7 @@ func TestGetObjectNoQuorum(t *testing.T) {
 	defer obj.Shutdown(context.Background())
 	defer removeRoots(fsDirs)
 
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	xl := z.serverPools[0].sets[0]
 
 	// Create "bucket"
@@ -604,7 +604,7 @@ func TestHeadObjectNoQuorum(t *testing.T) {
 	defer obj.Shutdown(context.Background())
 	defer removeRoots(fsDirs)
 
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	xl := z.serverPools[0].sets[0]
 
 	// Create "bucket"
@@ -679,7 +679,7 @@ func TestPutObjectNoQuorum(t *testing.T) {
 	defer obj.Shutdown(context.Background())
 	defer removeRoots(fsDirs)
 
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	xl := z.serverPools[0].sets[0]
 
 	// Create "bucket"
@@ -742,7 +742,7 @@ func TestPutObjectNoQuorumSmall(t *testing.T) {
 	defer obj.Shutdown(context.Background())
 	defer removeRoots(fsDirs)
 
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	xl := z.serverPools[0].sets[0]
 
 	// Create "bucket"
@@ -876,7 +876,7 @@ func testObjectQuorumFromMeta(obj ObjectLayer, instanceType string, dirs []strin
 	partCount := 3
 	data := bytes.Repeat([]byte("a"), 6*1024*1024*partCount)
 
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	xl := z.serverPools[0].sets[0]
 	erasureDisks := xl.getDisks()
 

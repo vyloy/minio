@@ -232,7 +232,7 @@ func TestHealing(t *testing.T) {
 	defer obj.Shutdown(context.Background())
 	defer removeRoots(fsDirs)
 
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	er := z.serverPools[0].sets[0]
 
 	// Create "bucket"
@@ -595,7 +595,7 @@ func TestHealCorrectQuorum(t *testing.T) {
 	}
 
 	// Test 1: Remove the object backend files from the first disk.
-	z := objLayer.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(objLayer)
 	for _, set := range z.serverPools {
 		er := set.sets[0]
 		erasureDisks := er.getDisks()
@@ -709,7 +709,7 @@ func TestHealObjectCorruptedPools(t *testing.T) {
 	}
 
 	// Test 1: Remove the object backend files from the first disk.
-	z := objLayer.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(objLayer)
 	for _, set := range z.serverPools {
 		er := set.sets[0]
 		erasureDisks := er.getDisks()
@@ -876,7 +876,7 @@ func TestHealObjectCorruptedXLMeta(t *testing.T) {
 		t.Fatalf("Failed to complete multipart upload - %v", err)
 	}
 
-	z := objLayer.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(objLayer)
 	er := z.serverPools[0].sets[0]
 	erasureDisks := er.getDisks()
 	firstDisk := erasureDisks[0]
@@ -1014,7 +1014,7 @@ func TestHealObjectCorruptedParts(t *testing.T) {
 	}
 
 	// Test 1: Remove the object backend files from the first disk.
-	z := objLayer.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(objLayer)
 	er := z.serverPools[0].sets[0]
 	erasureDisks := er.getDisks()
 	firstDisk := erasureDisks[0]
@@ -1160,7 +1160,7 @@ func TestHealObjectErasure(t *testing.T) {
 	}
 
 	// Remove the object backend files from the first disk.
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	er := z.serverPools[0].sets[0]
 	firstDisk := er.getDisks()[0]
 
@@ -1242,7 +1242,7 @@ func TestHealEmptyDirectoryErasure(t *testing.T) {
 	}
 
 	// Remove the object backend files from the first disk.
-	z := obj.(*erasureServerPools)
+	z := mustCast2ErasureServerPools(obj)
 	er := z.serverPools[0].sets[0]
 	firstDisk := er.getDisks()[0]
 	err = firstDisk.DeleteVol(context.Background(), pathJoin(bucket, encodeDirObject(object)), true)
@@ -1349,7 +1349,7 @@ func TestHealLastDataShard(t *testing.T) {
 			}
 			actualSha256 := actualH.Sum(nil)
 
-			z := obj.(*erasureServerPools)
+			z := mustCast2ErasureServerPools(obj)
 			er := z.serverPools[0].getHashedSet(object)
 
 			disks := er.getDisks()

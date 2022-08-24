@@ -82,28 +82,28 @@ type BucketInfo struct {
 // ObjectInfo - represents object metadata.
 type ObjectInfo struct {
 	// Name of the bucket.
-	Bucket string
+	Bucket string `gorm:"-:all"`
 
 	// Name of the object.
-	Name string
+	Name string `gorm:"primaryKey;index:,composite:list"`
 
 	// Date and time when the object was last modified.
-	ModTime time.Time
+	ModTime time.Time `gorm:"index:,composite:list"`
 
 	// Total object size.
-	Size int64
+	Size int64 `gorm:"index:,composite:list"`
 
 	// IsDir indicates if the object is prefix.
-	IsDir bool
+	IsDir bool `gorm:"index:,composite:list"`
 
 	// Hex encoded unique entity tag of the object.
-	ETag string
+	ETag string `gorm:"index:,composite:list"`
 
 	// The ETag stored in the gateway backend
 	InnerETag string
 
 	// Version ID of this object.
-	VersionID string
+	VersionID string `gorm:"primaryKey"`
 
 	// IsLatest indicates if this is the latest current version
 	// latest can be true for delete marker or a version.
@@ -114,7 +114,7 @@ type ObjectInfo struct {
 	DeleteMarker bool
 
 	// Transitioned object information
-	TransitionedObject TransitionedObject
+	TransitionedObject TransitionedObject `gorm:"embedded"`
 
 	// RestoreExpires indicates date a restored object expires
 	RestoreExpires time.Time
@@ -144,18 +144,18 @@ type ObjectInfo struct {
 	ReplicationStatusInternal string
 	ReplicationStatus         replication.StatusType
 	// User-Defined metadata
-	UserDefined map[string]string
+	UserDefined map[string]string `gorm:"serializer:json"`
 
 	// User-Defined object tags
 	UserTags string
 
 	// List of individual parts, maximum size of upto 10,000
-	Parts []ObjectPartInfo `json:"-"`
+	Parts []ObjectPartInfo `json:"-" gorm:"-:all"`
 
 	// Implements writer and reader used by CopyObject API
-	Writer       io.WriteCloser `json:"-"`
-	Reader       *hash.Reader   `json:"-"`
-	PutObjReader *PutObjReader  `json:"-"`
+	Writer       io.WriteCloser `json:"-" gorm:"-:all"`
+	Reader       *hash.Reader   `json:"-" gorm:"-:all"`
+	PutObjReader *PutObjReader  `json:"-" gorm:"-:all"`
 
 	metadataOnly bool
 	versionOnly  bool // adds a new version, only used by CopyObject

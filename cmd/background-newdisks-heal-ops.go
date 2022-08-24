@@ -251,7 +251,7 @@ func (h *healingTracker) toHealingDisk() madmin.HealingDisk {
 }
 
 func initAutoHeal(ctx context.Context, objAPI ObjectLayer) {
-	z, ok := objAPI.(*erasureServerPools)
+	z, ok := cast2ErasureServerPools(objAPI)
 	if !ok {
 		return
 	}

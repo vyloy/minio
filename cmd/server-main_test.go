@@ -59,7 +59,7 @@ func TestNewObjectLayer(t *testing.T) {
 		t.Fatal("Unexpected object layer initialization error", err)
 	}
 
-	_, ok = obj.(*erasureServerPools)
+	_, ok = cast2ErasureServerPools(obj)
 	if !ok {
 		t.Fatal("Unexpected object layer detected", reflect.TypeOf(obj))
 	}
